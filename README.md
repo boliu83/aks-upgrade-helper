@@ -1,3 +1,5 @@
+<img src="/logo.png" width="150" height="150">
+
 # AKS Upgrade Helper
 
 A comprehensive tool for validating and preparing Azure Kubernetes Service (AKS) clusters for version upgrades and node OS image updates.
