@@ -44,7 +44,6 @@ function log_error() {
 
 
 function log_info() {
-    return 0
     log "INFO" "${1}"
 }
 
@@ -52,9 +51,18 @@ function log_success() {
     log "SUCCESS" "${1}"
 }
 
+function log_debug() {
+    log "DEBUG" "${1}"
+}
+
 function print_header() {
     local message=$1
     echo -e "\n\e[1m\e[36m${message}\e[0m\n"
+}
+
+function print_subheader() {
+    local message=$1
+    echo -e "\n\e[1m\e[34m${message}\e[0m\n"
 }
 
 
@@ -80,6 +88,7 @@ function get_cluster_info() {
     CLUSTER_RESOURCE_GROUP=$(echo $CLUSTER_JSON | jq -r '.resourceGroup')
     CLUSTER_NETWORK_PLUGIN=$(echo $CLUSTER_JSON | jq -r '.properties.networkProfile.networkPlugin')
     CLUSTER_POWERSTATE=$(echo $CLUSTER_JSON | jq -r '.properties.powerState.code')
+    CLUSTER_LOCATION=$(echo $CLUSTER_JSON | jq -r '.location')
     CLUSTER_PROVISIONING_STATE=$(echo $CLUSTER_JSON | jq -r '.properties.provisioningState')
     CLUSTER_NETWORK_PLUGIN_MODE=$(echo $CLUSTER_JSON | jq -r '.properties.networkProfile.networkPluginMode')
     CLUSTER_NETWORK_DATAPLANE=$(echo $CLUSTER_JSON | jq -r '.properties.networkProfile.networkDataplane')
@@ -222,4 +231,42 @@ function padding() {
         # if already ≥80 chars, truncate to 80
         echo " "
     fi
+}
+
+# Function to show cluster and nodepool details
+function print_cluster_details() {
+cat <<EOF | column -t -s','
+Cluster Name:,${CLUSTER_NAME}
+Resource Id:,${CLUSTER_RESOURCE_ID}
+Region:,${CLUSTER_REGION}
+Cluster Power State:,${CLUSTER_POWERSTATE}
+Cluster Current Version:,${CLUSTER_CURRENT_VERSION}
+Cluster Provisioning State:,${CLUSTER_PROVISIONING_STATE}
+Network Plugin:,${CLUSTER_NETWORK_PLUGIN}
+Network Plugin Mode:,${CLUSTER_NETWORK_PLUGIN_MODE}
+Network Dataplane:,${CLUSTER_NETWORK_DATAPLANE}
+Network Policy:,${CLUSTER_NETWORK_POLICY}
+EOF
+}
+
+function print_agentpool_details() {
+    print_header "Agentpool Details"
+    echo $CLUSTER_JSON | jq -r '
+        "Name,ProvisioningState,NodeOSImage,Version,Count,MaxPods,MaxSurge,Zones",
+        "----,-----------------,-----------,-------,-----,-------,--------,-----",
+        (.properties.agentPoolProfiles[] |
+            "\(.name),\(.provisioningState),\(.nodeImageVersion),\(.currentOrchestratorVersion),\(.count),\(.maxPods),\(.upgradeSettings.maxSurge),\(.availabilityZones)"
+        )
+    ' | column -t -s','
+
+    print_header "Agentpool Subnet Details"
+    local output="Agentpool,Vnet,Subnet,CIDR,AvailableIPs,SurgeIPsRequired,HasEnoughIP\n--------,----,------,----,-------------,-----------------,-------"
+    for ap in $(echo "${AGENTPOOLS}"); do
+
+        local has_enough_ips=false
+        [[ ${AGENTPOOL_SUBNET_AVAILABLE_IPS[${ap}]} -gt ${AGENTPOOL_SURGEIP_REQUIRED[${ap}]} ]] && has_enough_ips=true
+        output="${output}\n${ap},${AGENTPOOL_SUBNET_VNET[${ap}]},${AGENTPOOL_SUBNET_NAME[${ap}]},${AGENTPOOL_SUBNET_CIDR[${ap}]},${AGENTPOOL_SUBNET_AVAILABLE_IPS[${ap}]},${AGENTPOOL_SURGEIP_REQUIRED[${ap}]},${has_enough_ips}"
+    done
+    echo -e "$output" | column -t -s','
+    echo ""
 }
