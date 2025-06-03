@@ -10,7 +10,7 @@ variables:
   value: $[ split(variables.CLUSTER_RESOURCE_ID, '/')[8] ]
 
 # pipeline run name is set to the following format
-name: $(Date:yyyyMMdd)_$(RUN_SUBSCRIPTION)_$(RUN_RESOURCEGROUP)_$(RUN_RESOURCENAME)_$(UPGRADE_VERSION)
+name: $(SCHEDULED_AT_UTC)_$(RUN_SUBSCRIPTION)_$(RUN_RESOURCEGROUP)_$(RUN_RESOURCENAME)_$(UPGRADE_VERSION)
 appendCommitMessageToRunName: false
 
 pool:
