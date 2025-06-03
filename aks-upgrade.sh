@@ -60,7 +60,6 @@ else
     --node-image-only -y --no-wait
 fi
 
-
 while true; do
     timestamp=$(date +"%Y-%m-%d %H:%M:%S")
     CLUSTER_PROVISIONING_STATE=$(az aks show --resource-group "${CLUSTER_RESOURCE_GROUP}" --name "${CLUSTER_NAME}" --query provisioningState -o tsv)
@@ -70,7 +69,10 @@ while true; do
         echo "${timestamp} Cluster upgrade in progress... Current state: ${CLUSTER_PROVISIONING_STATE}, Agent Pool state: ${AGENTPOOL_PROVISIONING_STATE}"
         echo "${timestamp} sleeping for 60 seconds..."
         sleep 60
+    else
+        echo "${timestamp} Cluster upgrade completed. Current state: ${CLUSTER_PROVISIONING_STATE}, Agent Pool state: ${AGENTPOOL_PROVISIONING_STATE}"
+        break
     fi
 
-    echo "${timestamp} Cluster upgrade completed. Current state: ${CLUSTER_PROVISIONING_STATE}, Agent Pool state: ${AGENTPOOL_PROVISIONING_STATE}"
+    
 done
