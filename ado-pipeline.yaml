@@ -1,8 +1,12 @@
 trigger:
 - none
 
+variables:
+- name: RUN_SUBSCRIPTION
+  value: split(CLUSTER_RESOURCE_ID, '/')[2]
+
 # pipeline run name is set to the following format
-name: $(Date:yyyyMMdd)_$(CLUSTER_RESOURCE_ID)
+name: $(Date:yyyyMMdd)_$(RUN_SUBSCRIPTION)
 appendCommitMessageToRunName: false
 
 pool:
