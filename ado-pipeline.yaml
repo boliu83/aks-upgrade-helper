@@ -8,9 +8,11 @@ variables:
   value: $[ split(variables.CLUSTER_RESOURCE_ID, '/')[4] ]
 - name: RUN_RESOURCENAME
   value: $[ split(variables.CLUSTER_RESOURCE_ID, '/')[8] ]
+- name: RUN_SCHEDULED_AT
+  value: $[ replace(variables.SCHEDULED_AT_UTC,':', '-') ]
 
 # pipeline run name is set to the following format
-name: $(SCHEDULED_AT_UTC)_$(RUN_SUBSCRIPTION)_$(RUN_RESOURCEGROUP)_$(RUN_RESOURCENAME)_$(UPGRADE_VERSION)
+name: $(RUN_SCHEDULED_AT)_$(RUN_SUBSCRIPTION)_$(RUN_RESOURCEGROUP)_$(RUN_RESOURCENAME)_$(UPGRADE_VERSION)
 appendCommitMessageToRunName: false
 
 pool:
