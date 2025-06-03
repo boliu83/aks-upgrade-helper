@@ -15,6 +15,9 @@ function run_check() {
 
     kubectl_output=$(echo "${shell_output}" | jq -r .logs)
 
+    # backup the pdb
+    echo $kubectl_output > "${STAGING_DIR}/${STAGE}/pdbs.json"
+
     echo "$kubectl_output" | jq -r '"Name,Namespace,MinAvailable,MaxUnavailable,DisruptionAllowed",
         "----,---------,------------,---------------,-----------------",
         (.items[] | "\(.metadata.name),\(.metadata.namespace),\(.spec.minAvailable // "-"),\(.spec.maxUnavailable // "-"),\(.status.disruptionsAllowed)")' |

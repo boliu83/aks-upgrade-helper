@@ -98,77 +98,44 @@ You can easily extend the tool by adding new check scripts to the `checks` direc
 
 ### Example: Creating a Custom Check
 
-Here's a simple example of a check that verifies if there are enough available IPs in the subnet:
+Here's a simple example of a check that throws a warning if the cluster's outbound type is loadBalancer:
 
 ```bash
-#!/bin/bash
-# filepath: checks/available_ip.sh
-
 function run_check() {
-    log_info "Checking available IPs in subnet..."
-    
-    # Get subnet ID from the cluster
-    local subnet_id=$(az aks show --ids "${CLUSTER_RESOURCE_ID}" \
-        --query "networkProfile.networkPlugin" -o tsv)
-    
-    # Skip check if not using Azure CNI
-    if [[ "${subnet_id}" != "azure" ]]; then
-        log_info "Cluster is not using Azure CNI, skipping available IP check"
-        return 0  # Success
-    fi
-    
-    # Get subnet information and check available IPs
-    local subnet_id=$(az aks show --ids "${CLUSTER_RESOURCE_ID}" \
-        --query "networkProfile.networkConfig.podCidr" -o tsv)
-    
-    if [[ -n "${subnet_id}" ]]; then
-        # Query for available IPs
-        local available_ips=$(az network vnet subnet show \
-            --ids "${subnet_id}" \
-            --query "addressPrefix" -o tsv)
-        
-        # Perform check logic
-        # ...logic to calculate available IPs...
-        
-        local min_required_ips=20
-        if [[ ${available_ips} -lt ${min_required_ips} ]]; then
-            log_error "Not enough available IPs in subnet. Found ${available_ips}, minimum required: ${min_required_ips}"
-            return 1  # Failure
-        else
-            log_success "Sufficient IPs available in subnet: ${available_ips}"
-            return 0  # Success
-        fi
+    log_info "Checking outbound type for AKS cluster ${CLUSTER_NAME} in resource group ${CLUSTER_RESOURCE_GROUP}"
+    outbound_type=$(echo $CLUSTER_JSON | jq -r '.properties.networkProfile.outboundType')
+
+    if [[ $outbound_type == "loadBalancer" ]]; then
+        log_error "Outbound type is loadBalancer. Exception required before upgrade. Please see <insert_link> for more details."
+        return 2 # Warning status for outboundType loadBalancer. we don't want to block the upgrade, but we need to warn the user.
     else
-        log_warn "Could not determine subnet configuration, skipping IP check"
-        return 2  # Warning
+        return 0
     fi
 }
 ```
 
-Make it executable:
-```bash
-chmod +x checks/available_ip.sh
-```
 
 Now when you run the main script, it will automatically find and execute your new check.
-
 ## Project Structure
 
 ```
 aks-upgrade-helper/
-├── aks-upgrade-helper.sh       # Main script
+├── aks-upgrade-helper.sh     # Main script
 ├── common.sh                 # Common functions and utilities
 ├── README.md                 # Documentation
+├── logo.png                  # Project logo
 ├── actions/                  # Action scripts for upgrade operations
 │   └── monitor_upgrade.sh    # Script to monitor upgrade progress
 ├── checks/                   # Pre-upgrade validation checks
 │   ├── available_ip.sh       # Check for available IPs in subnet
 │   ├── check_pdb.sh          # Validate PodDisruptionBudgets
-│   ├── msi_on_vmas.sh        # Check for MSI on VMAS clusters
+│   ├── lb_sku.sh             # Check load balancer SKU type
+│   ├── msi_on_vmas.sh        # Check for MSI on VMAS clusters (not implemented yet)
 │   ├── nginx_ingress_version.sh  # Validate NGINX ingress compatibility
 │   ├── number_of_tags.sh     # Check for resource tag limits
 │   ├── outbound_connectivity.sh  # Validate outbound connectivity
-│   └── outbound_type.sh      # Check outbound type configuration
+│   ├── outbound_type.sh      # Check outbound type configuration
+│   └── target_version.sh     # Validate target version compatibility
 └── s/                        # Staging directory for outputs (used by ADO pipeline)
 ```
 

@@ -34,8 +34,19 @@ function log() {
     local log_level="$1"
     local message="$2"
     local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
-    
-    echo -e "${timestamp} [${log_level}]: ${message}" # | tee -a "${LOG_FILE}"
+
+    # check if System.StageName is set, if not, use default stage name
+    if [ -n "${SYSTEM_STAGENAME:-}" ]; then
+        STAGE="${SYSTEM_STAGENAME}"
+    fi
+
+    local LOG_FILE="${STAGING_DIR}/${STAGE}/aks-upgrade-helper.log"
+
+    if [ ! -d "${STAGING_DIR}/${STAGE}" ]; then
+        mkdir -p "${STAGING_DIR}/${STAGE}"
+    fi
+
+    echo -e "${timestamp} [${log_level}]: ${message}" | tee -a "${LOG_FILE}"
 }
 
 function log_error() {

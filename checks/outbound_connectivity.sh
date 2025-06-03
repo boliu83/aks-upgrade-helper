@@ -55,8 +55,8 @@ function run_check() {
     # failed_count=$((failed_count+$?))
     check_https_dest "packages.microsoft.com"
     failed_count=$((failed_count+$?))
-    check_https_dest "www.faileddomain.com"
-    failed_count=$((failed_count+$?))
+    # check_https_dest "www.faileddomain.com"
+    # failed_count=$((failed_count+$?))
 
     if [ -n "${ADD_CONNECTIVITY_CHECKS:-}" ]; then
         IFS=',' read -ra ADDR <<< "${ADD_CONNECTIVITY_CHECKS}"

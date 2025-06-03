@@ -83,9 +83,6 @@ function show_usage() {
 
 }
 
-
-
-
 # run all checks
 function run_checks() {
     print_header "Running pre-upgrade checks..."
@@ -113,7 +110,8 @@ function run_checks() {
                 echo -e "✅ \033[0;32m[PASSED]\033[0m"
                 ;;
             1)
-                echo -e "❌ \033[0;31m[FAILED]\033[0m"               
+                echo -e "❌ \033[0;31m[FAILED]\033[0m"
+                FAILED_CHECKS=$((FAILED_CHECKS + 1))     
                 ;;
             2)
                 echo -e "⚠️ \033[0;33m[WARN]\033[0m"
@@ -125,8 +123,14 @@ function run_checks() {
         esac
 
     done
-    
-    log_success "All pre-upgrade checks passed. "
+    if [[ ${FAILED_CHECKS} -gt 0 ]]; then
+        log_error "Some pre-upgrade checks failed. Please review the output above."
+        echo ""
+        log_error "Please fix the issues and re-run the script."
+        log_error "Exiting with error code 1."
+        return 1
+    fi
+    log_success "All pre-upgrade checks passed."
     return 0
 }
 
@@ -217,6 +221,8 @@ function main() {
 
     # Run all checks
     run_checks
+
+
 }
 
 
