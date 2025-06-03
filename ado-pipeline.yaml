@@ -18,5 +18,6 @@ stages:
     - script: |
         echo "Resource Id: $(CLUSTER_RESOURCE_ID)"
         STAGE="$(System.StageName)"
+        echo "STAGE ${STAGE}"
     - script: |
         echo "Stage: ${STAGE}"
