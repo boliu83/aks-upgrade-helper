@@ -1,0 +1,21 @@
+trigger:
+- none
+
+# pipeline run name is set to the following format
+name: "$(Date:yyyyMMdd)_$(replace(variables['CLUSTER_RESOURCE_ID'], '/', '_'))"
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+- stage: scheduling
+  displayName: Scheduling
+  jobs:
+  - job: s1
+    displayName: Show resource id
+    steps:
+    - script: |
+        echo "Resource Id: $(CLUSTER_RESOURCE_ID)"
+        STAGE="$(System.StageName)"
+    - script: |
+        echo "Stage: ${STAGE}"
