@@ -10,8 +10,6 @@ variables:
   value: $[ split(variables.CLUSTER_RESOURCE_ID, '/')[8] ]
 - name: RUN_SCHEDULED_AT
   value: $[ replace(variables.SCHEDULED_AT_UTC,':', '-') ]
-- name: DELAY_MINUTES
-  value: 10 # default delay
 
 # pipeline run name is set to the following format
 name: $(RUN_SCHEDULED_AT)_$(RUN_SUBSCRIPTION)_$(RUN_RESOURCEGROUP)_$(RUN_RESOURCENAME)_$(UPGRADE_VERSION)
