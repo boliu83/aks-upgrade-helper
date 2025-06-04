@@ -31,6 +31,7 @@ stages:
         if minutes=$(bash get-schedule-delay.sh "${SCHEDULED_AT_UTC}"); then
           echo "Setting variable DELAY_MINUTES to ${minutes}"
           echo "##vso[task.setvariable variable=DELAY_MINUTES;]${minutes}"
+          echo "DELAY_MINUTES: ${DELAY_MINUTES}"
         else
            echo "unable to get schedule delay. Please check SCHEDULED_AT_UTC variable value."
            echo "bash get-schedule-delay.sh \"${SCHEDULED_AT_UTC}\""
