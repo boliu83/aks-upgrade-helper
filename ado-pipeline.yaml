@@ -38,6 +38,7 @@ stages:
       inputs:
         pathToPublish: $(Build.SourcesDirectory)/backup
         artifactName: scheduling_check_results
+        
   - job: calculateSchedule
     dependsOn: preScheduleChecks
     displayName: calcuate minutes till scheduled upgrade time
@@ -89,6 +90,12 @@ stages:
         scriptLocation: 'scriptPath'
         scriptPath: 'aks-upgrade-helper.sh'
         arguments: '-r $(CLUSTER_RESOURCE_ID) -t $(UPGRADE_VERSION)'
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish scheduling check results'
+      inputs:
+        pathToPublish: $(Build.SourcesDirectory)/backup
+        artifactName: preupgrade_results
+
   - job: upgrade
     dependsOn: preUpgradeChecks
     displayName: Upgrade AKS cluster
@@ -101,4 +108,22 @@ stages:
         scriptLocation: 'scriptPath'
         scriptPath: 'aks-upgrade.sh'
         arguments: '-r $(CLUSTER_RESOURCE_ID) -t $(UPGRADE_VERSION)'
+
+  - job: postUpgradeChecks
+    displayName: Run post-upgrade checks after upgrading
+    dependsOn: upgrade
+    steps:
+    - task: AzureCLI@2
+      displayName: 'All post-upgrade checks'
+      inputs:
+        azureSubscription: 'aks-lab-connection'
+        scriptType: 'bash'
+        scriptLocation: 'scriptPath'
+        scriptPath: 'aks-upgrade-helper.sh'
+        arguments: '-r $(CLUSTER_RESOURCE_ID) -t $(UPGRADE_VERSION)'
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish scheduling check results'
+      inputs:
+        pathToPublish: $(Build.SourcesDirectory)/backup
+        artifactName: postupgrade_results
 
