@@ -26,11 +26,11 @@ stages:
     displayName: calcuate minutes until scheduled upgrade 
     steps:
     - script: |
-        if minutes=$(bash get-schedule-delay.sh ${SCHEDULED_AT_UTC}); then
+        if minutes=$(bash get-schedule-delay.sh "${SCHEDULED_AT_UTC}"); then
            echo "##vso[task.setvariable variable=DELAY_MINUTES;]${minutes}"
         else
            echo "unable to get schedule delay. Please check SCHEDULED_AT_UTC variable value."
-           echo "bash get-schedule-delay.sh ${SCHEDULED_AT_UTC}"
+           echo "bash get-schedule-delay.sh \"${SCHEDULED_AT_UTC}\""
            exit 1
         fi
         displayName: get schedule delay in minutes
