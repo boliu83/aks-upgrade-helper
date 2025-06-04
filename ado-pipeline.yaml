@@ -70,3 +70,29 @@ stages:
       inputs:
         delayForMinutes: $(DELAY_MINUTES)
         
+- stage: Upgrading
+  displayName: Upgrade AKS cluster
+  jobs:
+  - job: preUpgradeChecks
+    displayName: Run pre-upgrade checks before upgrading
+    steps:
+    - task: AzureCLI@2
+      displayName: 'All pre-upgrade checks'
+      inputs:
+        azureSubscription: 'aks-lab-connection'
+        scriptType: 'bash'
+        scriptLocation: 'scriptPath'
+        scriptPath: 'aks-upgrade-helper.sh'
+        arguments: '-r $(CLUSTER_RESOURCE_ID) -t $(UPGRADE_VERSION)'
+  - job: upgrade
+    displayName: Upgrade AKS cluster
+    steps:
+    - task: AzureCLI@2
+      displayName: 'Upgrade AKS cluster'
+      inputs:
+        azureSubscription: 'aks-lab-connection'
+        scriptType: 'bash'
+        scriptLocation: 'scriptPath'
+        scriptPath: 'aks-upgrade.sh'
+        arguments: '-r $(CLUSTER_RESOURCE_ID) -t $(UPGRADE_VERSION)'
+
