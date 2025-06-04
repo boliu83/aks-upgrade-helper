@@ -54,6 +54,7 @@ stages:
       DELAY_MINUTES: $[stageDependencies.Scheduling.calculateSchedule.outputs['getDelayMinutes.DELAY_MINUTES']]
     steps:
     - task: Delay@1
+      displayName: "Sleep for ${{ variables.DELAY_MINUTES }} minutes"
       inputs:
         delayForMinutes: $(DELAY_MINUTES)
         
