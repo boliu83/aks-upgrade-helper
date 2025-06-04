@@ -22,8 +22,8 @@ stages:
 - stage: Scheduling
   displayName: Scheduling
   variables:
-    CLUSTER_RESOURCE_ID: $[variables.CLUSTER_RESOURCE_ID]
-    TARGET_VERSION: $[variables.TARGET_VERSION]
+    CLUSTER_RESOURCE_ID: $(CLUSTER_RESOURCE_ID)
+    TARGET_VERSION: $(TARGET_VERSION)
   jobs:
   - job: preScheduleChecks
     displayName: Run pre-upgrade checks before scheduluing
