@@ -19,18 +19,29 @@ pool:
   vmImage: ubuntu-latest
 
 stages:
-- stage: scheduling
+- stage: Scheduling
   displayName: Scheduling
   jobs:
-  - job: s1
-    displayName: Show resource id
+  - job: calculate_minutes_until
+    displayName: calcuate minutes until scheduled upgrade 
     steps:
     - script: |
-        echo "Resource Id: $(CLUSTER_RESOURCE_ID)"
-        STAGE="$(System.StageName)"
-        echo "STAGE ${STAGE}"
-    - script: |
-        echo "Stage: ${SYSTEM_STAGENAME}"
-        echo "StageName: ${STAGENAME}"
-      env:
-        STAGENAME: $(System.StageName)
+        if minutes=$(bash get-schedule-delay.sh ${SCHEDULED_AT_UTC}); then
+           echo "##vso[task.setvariable variable=DELAY_MINUTES;]${minutes}"
+        else
+           echo "unable to get schedule delay. Please check SCHEDULED_AT_UTC variable value."
+           exit 1
+        fi
+  
+- stage: Waiting
+  displayName: Wait for scheduled upgrade time at $(SCHEDULED_AT_UTC)
+  jobs:
+  - job: wait
+    displayName: wait for upgrade scheduled in $(DELAY_MINUTES) minutes
+    pool: server # agentless job
+    timeoutInMinutes:  43200 # max schedule ahead is 30 days
+    steps:
+    - task: Delay@1
+      inputs:
+        delayForMinutes: $(DELAY_MINUTES)
+        
