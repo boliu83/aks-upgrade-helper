@@ -32,7 +32,7 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'scriptPath'
         scriptPath: 'aks-upgrade-helper.sh'
-        arguments: '-r $(CLUSTER_RESOURCE_ID) -t $(TARGET_VERSION)'
+        arguments: '-r $(CLUSTER_RESOURCE_ID) -t $(UPGRADE_VERSION)'
   - job: calculateSchedule
     displayName: calcuate minutes until scheduled upgrade 
     steps:
