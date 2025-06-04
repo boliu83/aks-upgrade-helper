@@ -31,6 +31,7 @@ stages:
         else
            echo "unable to get schedule delay. Please check SCHEDULED_AT_UTC variable value."
            echo "SCHEDULED_AT_UTC: $(SCHEDULED_AT_UTC)"
+           echo "bash get-schedule-delay.sh $(SCHEDULED_AT_UTC)"
            exit 1
         fi
   
