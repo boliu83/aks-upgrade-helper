@@ -34,6 +34,9 @@ stages:
            echo "bash get-schedule-delay.sh $(SCHEDULED_AT_UTC)"
            exit 1
         fi
+        displayName: get schedule delay in minutes
+        env:
+          SCHEDULED_AT_UTC: $(SCHEDULED_AT_UTC)
   
 - stage: Waiting
   displayName: Wait for scheduled upgrade time at $(SCHEDULED_AT_UTC)
