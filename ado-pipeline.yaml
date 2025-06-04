@@ -47,7 +47,7 @@ stages:
   displayName: Wait for scheduled upgrade time
   jobs:
   - job: wait
-    displayName: "wait for upgrade scheduled in $[SCHEDULED_AT_UTC] minutes"
+    displayName: "wait for upgrade scheduled at ${{ variables.SCHEDULED_AT_UTC }}"
     pool: server # agentless job
     timeoutInMinutes:  43200 # max schedule ahead is 30 days
     variables:
