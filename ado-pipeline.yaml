@@ -21,7 +21,21 @@ pool:
 stages:
 - stage: Scheduling
   displayName: Scheduling
+  variables:
+    CLUSTER_RESOURCE_ID: $[variables.CLUSTER_RESOURCE_ID]
+    TARGET_VERSION: $[variables.TARGET_VERSION]
   jobs:
+  - job: preScheduleChecks
+    displayName: Run pre-upgrade checks before scheduluing
+    steps:
+    - task: AzureCLI@2
+      displayName: 'All pre-upgrade checks'
+      inputs:
+        azureSubscription: 'aks-lab-connection'
+        scriptType: 'bash'
+        scriptLocation: 'scriptPath'
+        scriptPath: 'aks-upgrade-helper.sh'
+        arguments: '-r $(CLUSTER_RESOURCE_ID) -t $(TARGET_VERSION)'
   - job: calculateSchedule
     displayName: calcuate minutes until scheduled upgrade 
     steps:
