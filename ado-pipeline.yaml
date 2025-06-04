@@ -39,7 +39,7 @@ stages:
       env:
         SCHEDULED_AT_UTC: $[ variables.SCHEDULED_AT_UTC ]
     - script: |
-        echo "DELAY_MINUTES: ${getDelayMinutes.DELAY_MINUTES}"
+        echo "DELAY_MINUTES: $(getDelayMinutes.DELAY_MINUTES)"
       displayName: Print DELAY_MINUTES
       name: printDelayMinutes
   
@@ -47,7 +47,7 @@ stages:
   displayName: Wait for scheduled upgrade time
   jobs:
   - job: wait
-    displayName: wait for upgrade scheduled in $[ DELAY_MINUTES ] minutes
+    displayName: "wait for upgrade scheduled in $[SCHEDULED_AT_UTC] minutes"
     pool: server # agentless job
     timeoutInMinutes:  43200 # max schedule ahead is 30 days
     steps:
