@@ -39,7 +39,7 @@ stages:
         artifactName: scheduling_check_results
   - job: calculateSchedule
     dependsOn: preScheduleChecks
-    displayName: calcuate minutes until scheduled upgrade 
+    displayName: calcuate minutes till scheduled upgrade time
     steps:
     - script: |
         if minutes=$(bash get-schedule-delay.sh "${SCHEDULED_AT_UTC}"); then
