@@ -47,14 +47,14 @@ stages:
   displayName: Wait for scheduled upgrade time
   jobs:
   - job: wait
-    displayName: "wait for upgrade scheduled at ${{ variables.SCHEDULED_AT_UTC }}"
+    displayName: "wait for upgrade scheduled at $[variables.SCHEDULED_AT_UTC]"
     pool: server # agentless job
     timeoutInMinutes:  43200 # max schedule ahead is 30 days
     variables:
       DELAY_MINUTES: $[stageDependencies.Scheduling.calculateSchedule.outputs['getDelayMinutes.DELAY_MINUTES']]
     steps:
     - task: Delay@1
-      displayName: "Sleep for ${{ variables.DELAY_MINUTES }} minutes"
+      displayName: "Sleep for $[ variables.DELAY_MINUTES ] minutes"
       inputs:
         delayForMinutes: $(DELAY_MINUTES)
         
