@@ -85,6 +85,7 @@ stages:
         scriptPath: 'aks-upgrade-helper.sh'
         arguments: '-r $(CLUSTER_RESOURCE_ID) -t $(UPGRADE_VERSION)'
   - job: upgrade
+    dependsOn: preUpgradeChecks
     displayName: Upgrade AKS cluster
     steps:
     - task: AzureCLI@2
