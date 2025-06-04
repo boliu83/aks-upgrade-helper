@@ -34,7 +34,7 @@ source "${SCRIPT_DIR}/common.sh"
 
 # results/output from certain checks are saved in STAGING_DIR to be upladed
 # as pipeline artifacts
-STAGING_DIR="${SCRIPT_DIR}/a"
+STAGING_DIR="${SCRIPT_DIR}/backup"
 if [[ ! -d "${STAGING_DIR}" ]]; then
     mkdir -p "${STAGING_DIR}"
 fi

@@ -36,6 +36,7 @@ stages:
     - task: PublishBuildArtifacts@1
       displayName: 'Publish scheduling check results'
       inputs:
+        pathToPublish: $(Build.SourcesDirectory)/backup
         artifactName: scheduling_check_results
   - job: calculateSchedule
     dependsOn: preScheduleChecks
