@@ -41,7 +41,7 @@ stages:
         SCHEDULED_AT_UTC: $[ variables.SCHEDULED_AT_UTC ]
   
 - stage: Waiting
-  displayName: Wait for scheduled upgrade time at $(SCHEDULED_AT_UTC)
+  displayName: Wait for scheduled upgrade time at $[ SCHEDULED_AT_UTC ]
   jobs:
   - job: wait
     displayName: wait for upgrade scheduled in $[ DELAY_MINUTES ] minutes
