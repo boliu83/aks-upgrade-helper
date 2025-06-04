@@ -50,8 +50,10 @@ stages:
     displayName: "wait for upgrade scheduled in $[SCHEDULED_AT_UTC] minutes"
     pool: server # agentless job
     timeoutInMinutes:  43200 # max schedule ahead is 30 days
+    variables:
+      DELAY_MINUTES: $[stageDependencies.Scheduling.calculateSchedule.outputs['getDelayMinutes.DELAY_MINUTES']]
     steps:
     - task: Delay@1
       inputs:
-        delayForMinutes: $[stageDependencies.Scheduling.calculateSchedule.outputs['getDelayMinutes.DELAY_MINUTES']]
+        delayForMinutes: $(DELAY_MINUTES)
         
