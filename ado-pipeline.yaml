@@ -33,6 +33,10 @@ stages:
         scriptLocation: 'scriptPath'
         scriptPath: 'aks-upgrade-helper.sh'
         arguments: '-r $(CLUSTER_RESOURCE_ID) -t $(UPGRADE_VERSION)'
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish pre-upgrade check results'
+      inputs:
+        artifactName: scheduling_check_results
   - job: calculateSchedule
     dependsOn: preScheduleChecks
     displayName: calcuate minutes until scheduled upgrade 
