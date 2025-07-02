@@ -6,7 +6,7 @@ on:
 jobs: 
   test:
     permissions:
-      id-token: write # Require write permission to Fetch an OIDC token.
+      id-token: write # required for authenticate to Azure using OIDC token. https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure-openid-connect
 
     runs-on: ubuntu-latest
     steps:
