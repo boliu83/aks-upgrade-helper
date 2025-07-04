@@ -1,4 +1,4 @@
-name: Hello World
+name: Upgrade Cluster
 
 on:
   workflow_dispatch:

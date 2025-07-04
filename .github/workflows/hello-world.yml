@@ -1,4 +1,4 @@
-name: Hello World
+name: Upgrade scheduler
 
 on:
   workflow_dispatch:
