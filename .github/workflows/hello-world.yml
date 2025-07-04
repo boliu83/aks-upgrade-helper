@@ -6,21 +6,28 @@ on:
 jobs: 
   test:
     permissions:
-      id-token: write # required for authenticate to Azure using OIDC token. https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure-openid-connect
+      id-token: write # required for authenticate to Azure using OIDC token. 
+                      # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure-openid-connect
 
     runs-on: ubuntu-latest
     steps:
-    - name: Azure CLI Login
-      uses: azure/login@v2
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    - name: invoke upgrade-cluster workflow
+      run: |
+        gh workflow run upgrade-cluster.yml --ref main
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # - name: Azure CLI Login
+    #   uses: azure/login@v2
+    #   with:
+    #     client-id: ${{ secrets.AZURE_CLIENT_ID }}
+    #     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+    #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   
-    - name: Azure CLI script
-      uses: azure/cli@v2
-      with:
-        azcliversion: latest
-        inlineScript: |
-          az account show
-          # You can write your Azure CLI inline scripts here.
+    # - name: Azure CLI script
+    #   uses: azure/cli@v2
+    #   with:
+    #     azcliversion: latest
+    #     inlineScript: |
+    #       az account show
+    #       # You can write your Azure CLI inline scripts here.

@@ -1,0 +1,17 @@
+name: Hello World
+
+on:
+  workflow_dispatch:
+
+jobs: 
+  test:
+    permissions:
+      id-token: write # required for authenticate to Azure using OIDC token. 
+                      # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure-openid-connect
+
+    runs-on: ubuntu-latest
+    steps:
+    # print hello world using bash shell
+    - name: Print Hello World
+      shell: bash
+      run: echo "Hello World"
