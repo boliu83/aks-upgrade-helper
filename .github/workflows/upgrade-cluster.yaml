@@ -1,4 +1,4 @@
-name: Upgrade Cluster
+name: Upgrade Cluster -  ${{ github.event.inputs.cluster_name }}
 
 on:
   workflow_dispatch:
