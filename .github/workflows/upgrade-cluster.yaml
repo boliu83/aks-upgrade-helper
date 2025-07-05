@@ -1,4 +1,4 @@
-name: Upgrade Cluster -  ${{ github.event.inputs.cluster_name }}
+name: Upgrade Cluster
 
 on:
   workflow_dispatch:
@@ -12,6 +12,7 @@ on:
 
 jobs: 
   test:
+    name: Upgrade ${{ github.event.inputs.cluster_name }}
     permissions:
       id-token: write # required for authenticate to Azure using OIDC token. 
                       # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure-openid-connect
