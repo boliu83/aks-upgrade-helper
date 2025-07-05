@@ -10,9 +10,10 @@ on:
         required: true
         description: 'target version to upgrade to'
 
+run-name: Upgrade ${{ github.event.inputs.cluster_name }} 
+
 jobs: 
   test:
-    name: Upgrade ${{ github.event.inputs.cluster_name }}
     permissions:
       id-token: write # required for authenticate to Azure using OIDC token. 
                       # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure-openid-connect
