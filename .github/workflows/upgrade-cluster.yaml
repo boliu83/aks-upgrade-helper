@@ -21,4 +21,4 @@ jobs:
     # print hello world using bash shell
     - name: Print Hello World
       shell: bash
-      run: echo "Hello World"
+      run: echo "Hello World" && sleep 180
