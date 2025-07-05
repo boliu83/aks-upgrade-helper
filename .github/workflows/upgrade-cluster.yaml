@@ -2,6 +2,13 @@ name: Upgrade Cluster
 
 on:
   workflow_dispatch:
+    inputs:
+      cluster_resource_id:
+        required: true
+        description: 'Resource id of cluster to upgrade'
+      target_version:
+        required: true
+        description: 'target version to upgrade to'
 
 jobs: 
   test:
