@@ -10,7 +10,7 @@ on:
         required: true
         description: 'target version to upgrade to'
 
-run-name: Upgrade ${{ github.event.inputs.cluster_name }} 
+run-name: Upgrade ${{ github.event.inputs.cluster_resource_id }} 
 
 jobs: 
   test:
