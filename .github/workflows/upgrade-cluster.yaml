@@ -41,3 +41,9 @@ jobs:
         inlineScript: |
           az account show
           # You can write your Azure CLI inline scripts here.
+          
+    - name: Run pre-upgrade checks
+      shell: bash
+      run: |
+        az aks list -g lab-aks
+          
