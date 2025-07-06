@@ -20,7 +20,25 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-    # print hello world using bash shell
-    - name: Print Hello World
+    - name: print parameters
       shell: bash
-      run: echo "Hello World" && sleep 180
+      run: |
+        echo "======================================================"
+        echo "start upgrade-cluster.yaml workflow"
+        echo "- cluster_resource_id: " ${{ github.event.inputs.cluster_resource_id }}
+        echo "- target_version: " ${{ github.event.inputs.target_version }} 
+
+    - name: Azure CLI Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  
+    - name: Azure CLI script
+      uses: azure/cli@v2
+      with:
+        azcliversion: latest
+        inlineScript: |
+          az account show
+          # You can write your Azure CLI inline scripts here.
