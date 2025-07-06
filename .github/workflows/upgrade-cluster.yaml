@@ -40,5 +40,5 @@ jobs:
         azcliversion: latest
         inlineScript: |
           az account show
-          az aks list -n aks-lab
+          az aks list -g aks-lab
       
