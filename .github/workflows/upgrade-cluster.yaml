@@ -23,7 +23,6 @@ jobs:
     - name: print parameters
       shell: bash
       run: |
-        echo "======================================================"
         echo "start upgrade-cluster.yaml workflow"
         echo "- cluster_resource_id: " ${{ github.event.inputs.cluster_resource_id }}
         echo "- target_version: " ${{ github.event.inputs.target_version }} 
