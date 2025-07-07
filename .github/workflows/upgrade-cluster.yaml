@@ -43,5 +43,9 @@ jobs:
         azcliversion: latest
         inlineScript: |
           az account show
+
+    - name: Run upgrade helper to do pre-checks
+      shell: bash
+      run: |
           ./aks-upgrade-helper.sh -r  ${{ github.event.inputs.cluster_resource_id }} -t  ${{ github.event.inputs.target_version }} 
       
