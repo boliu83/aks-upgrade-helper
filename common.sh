@@ -66,6 +66,10 @@ function log_debug() {
     log "DEBUG" "${1}"
 }
 
+function log_warn() {
+    log "WARN" "${1}"
+}
+
 function print_header() {
     local message=$1
     echo -e "\n\e[1m\e[36m${message}\e[0m\n"
