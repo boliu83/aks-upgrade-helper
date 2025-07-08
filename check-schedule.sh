@@ -7,19 +7,24 @@ SCHEDULE_DIR="schedules"
 # Time window in seconds (8 hours)
 TIME_WINDOW=$((8 * 3600))
 
+GH_REPO="boliu83/aks-upgrade-helper"
+GH_BRANCH="master"
+
 # Stub for the actual upgrade function - assume implemented elsewhere
 run_aks_upgrade() {
   local subscriptionId="$1"
   local resourceGroup="$2"
   local resourceName="$3"
-  echo "Upgrading AKS cluster '$resourceName' in resource group '$resourceGroup' (subscription: $subscriptionId)..."
-  # Example Azure CLI call (uncomment and adjust as needed):
-  # az aks upgrade \
-  #   --subscription "$subscriptionId" \
-  #   --resource-group "$resourceGroup" \
-  #   --name "$resourceName" \
-  #   --control-plane-only \
-  #   --yes
+  local targetVersion="$4"
+
+  # kick off the upgrade-cluster.yaml workflow using gh cli
+  gh workflow run upgrade-cluster.yaml \
+    --repo "${GH_REPO}" \
+    --ref "${GH_BRANCH}" \
+    -f subscription_id="$subscriptionId" \
+    -f resource_group="$resourceGroup" \
+    -f cluster_name="$resourceName" \
+    -f target_version="$targetVersion"
 }
 
 # Function to validate ISO 8601 UTC timestamp (YYYY-MM-DDThh:mm[:ss]Z)
@@ -35,6 +40,14 @@ validate_iso8601() {
 
 # Get current time in UTC (seconds since epoch)
 NOW_UTC=$(date -u +"%s")
+
+# GH CLI login using GITHUB_TOKEN from environment variable
+if [[ -z "${GITHUB_TOKEN:-}" ]]; then
+  echo "Error: GITHUB_TOKEN environment variable is not set." >&2
+  exit 1
+fi
+
+echo "$GITHUB_TOKEN" | gh auth login --with-token 
 
 # Process each .txt file under the schedule directory
 for file in "$SCHEDULE_DIR"/*.txt; do
@@ -65,7 +78,7 @@ for file in "$SCHEDULE_DIR"/*.txt; do
     # Check if the upgrade is within the next 8 hours
     if (( delta >= 0 && delta <= TIME_WINDOW )); then
       echo "Scheduled upgrade is in current upgrade window. Triggering upgrade."
-      run_aks_upgrade "$subscriptionId" "$resourceGroup" "$resourceName"
+      run_aks_upgrade "$subscriptionId" "$resourceGroup" "$resourceName" "$targetVersion"
     else
       if (( delta < 0 )); then
         echo "Scheduled upgrade is in the past. Skipping..."

@@ -14,5 +14,7 @@ jobs:
 
     - name: check upgrade schedules
       shell: bash
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         ./check-schedule.sh
