@@ -22,6 +22,10 @@ Key features:
   - Execute AKS commands (using `az aks command invoke`)
   - List VMSS/VMAS details
 
+- Permissions required (TBC. more are required)
+  - Microsoft.ContainerService/managedClusters/write
+  - Microsoft.OperationsManagement/solutions/write
+
 ## Installation
 
 1. Clone this repository:
