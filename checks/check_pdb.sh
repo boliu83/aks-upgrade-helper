@@ -32,7 +32,7 @@ function run_check() {
         disruptionsAllowed=$(echo "$pdb" | jq -r '.status.disruptionsAllowed')
 
         if [[ "$disruptionsAllowed" == "0" ]]; then
-            log_info "PDB ${namespace}/${name} has ${disruptionsAllowed} disruptions allowed"
+            log_error "PDB ${namespace}/${name} has ${disruptionsAllowed} disruptions allowed"
             failed=1
         fi
     done

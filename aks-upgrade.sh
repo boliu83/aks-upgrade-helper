@@ -73,6 +73,4 @@ while true; do
         echo "${timestamp} Cluster upgrade completed. Current state: ${CLUSTER_PROVISIONING_STATE}, Agent Pool state: ${AGENTPOOL_PROVISIONING_STATE}"
         break
     fi
-
-    
 done

@@ -58,4 +58,91 @@ jobs:
       run: |
         cluster_resource_id="/subscriptions/${{ github.event.inputs.subscription_id }}/resourceGroups/${{ github.event.inputs.resource_group }}/providers/Microsoft.ContainerService/managedClusters/${{ github.event.inputs.cluster_name }}"
         ./aks-upgrade-helper.sh -r  ${cluster_resource_id} -t  ${{ github.event.inputs.target_version }}
+
+  upgrade-cluster:
+    name: Upgrade Cluster
+    needs: pre-upgrade-checks
+    permissions:
+      id-token: write # required for authenticate to Azure using OIDC token. 
+                      # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure-openid-connect
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out
+      uses: actions/checkout@v4
+      
+    - name: Azure CLI Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Upgrade AKS cluster
+      shell: bash
+      run: |
+        cluster_resource_id="/subscriptions/${{ github.event.inputs.subscription_id }}/resourceGroups/${{ github.event.inputs.resource_group }}/providers/Microsoft.ContainerService/managedClusters/${{ github.event.inputs.cluster_name }}"
+        ./aks-upgrade.sh -r ${cluster_resource_id} -t ${{ github.event.inputs.target_version }}
+
+  post-upgrade-checks:
+    name: Post-Upgrade Checks
+    needs: upgrade-cluster
+    permissions:
+      id-token: write # required for authenticate to Azure using OIDC token. 
+                      # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure-openid-connect
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out
+      uses: actions/checkout@v4
+      
+    - name: Azure CLI Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Run post-upgrade checks
+      shell: bash
+      run: |
+        cluster_resource_id="/subscriptions/${{ github.event.inputs.subscription_id }}/resourceGroups/${{ github.event.inputs.resource_group }}/providers/Microsoft.ContainerService/managedClusters/${{ github.event.inputs.cluster_name }}"
+        obs: 
+  pre-upgrade-checks:
+    name: Pre-Upgrade Checks
+    permissions:
+      id-token: write # required for authenticate to Azure using OIDC token. 
+                      # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure-openid-connect
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out
+      uses: actions/checkout@v4
+      
+    - name: print input variables
+      shell: bash
+      run: |
+        echo "start upgrade-cluster.yaml workflow"
+        echo "- subscription_id: " ${{ github.event.inputs.subscription_id }}
+        echo "- resource_group: " ${{ github.event.inputs.resource_group }}
+        echo "- cluster_name: " ${{ github.event.inputs.cluster_name }}
+        echo "- cluster_resource_id: " "/subscriptions/${{ github.event.inputs.subscription_id }}/resourceGroups/${{ github.event.inputs.resource_group }}/providers/Microsoft.ContainerService/managedClusters/${{ github.event.inputs.cluster_name }}"
+        echo "- target_version: " ${{ github.event.inputs.target_version }} 
+
+    - name: Azure CLI Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  
+    - name: Azure CLI script
+      uses: azure/cli@v2
+      with:
+        azcliversion: latest
+        inlineScript: |
+          az account show
+
+    - name: Run upgrade helper to do pre-checks
+      shell: bash
+      run: |
+        cluster_resource_id="/subscriptions/${{ github.event.inputs.subscription_id }}/resourceGroups/${{ github.event.inputs.resource_group }}/providers/Microsoft.ContainerService/managedClusters/${{ github.event.inputs.cluster_name }}"
+        ./aks-upgrade-helper.sh -r  ${cluster_resource_id} -t  ${{ github.event.inputs.target_version }} -s postcheck
       
