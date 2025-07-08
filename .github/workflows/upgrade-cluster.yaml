@@ -3,27 +3,33 @@ name: Upgrade Cluster
 on:
   workflow_dispatch:
     inputs:
-      cluster_resource_id:
+      subscription_id:
         required: true
-        description: 'Resource id of cluster to upgrade'
+        description: 'Azure subscription id to use for the upgrade'
+      resource_group:
+        required: true
+        description: 'Resource group of the cluster to upgrade'
+      cluster_name:
+        required: true
+        description: 'Name of the AKS cluster to upgrade'
       target_version:
         required: true
         description: 'target version to upgrade to'
 
-run-name: Upgrade ${{ github.event.inputs.cluster_resource_id }} 
+run-name: Upgrade ${{ github.event.inputs.cluster_name }}, ${{ github.event.inputs.resource_group }}, ${{ github.event.inputs.subscription_id }} to ${{ github.event.inputs.target_version }}
 
 jobs: 
-  test:
+  pre-upgrade-checks:
+    name: Pre-Upgrade Checks
     permissions:
       id-token: write # required for authenticate to Azure using OIDC token. 
                       # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure-openid-connect
-
     runs-on: ubuntu-latest
     steps:
     - name: Check out
       uses: actions/checkout@v4
       
-    - name: print parameters
+    - name: print input variables
       shell: bash
       run: |
         echo "start upgrade-cluster.yaml workflow"
@@ -47,5 +53,6 @@ jobs:
     - name: Run upgrade helper to do pre-checks
       shell: bash
       run: |
-          ./aks-upgrade-helper.sh -r  ${{ github.event.inputs.cluster_resource_id }} -t  ${{ github.event.inputs.target_version }} 
+        cluster_resource_id="/subscriptions/${{ github.event.inputs.subscription_id }}/resourceGroups/${{ github.event.inputs.resource_group }}/providers/Microsoft.ContainerService/managedClusters/${{ github.event.inputs.cluster_name }}"
+        ./aks-upgrade-helper.sh -r  ${cluster_resource_id} -t  ${{ github.event.inputs.target_version }}
       
