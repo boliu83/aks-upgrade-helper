@@ -33,7 +33,10 @@ jobs:
       shell: bash
       run: |
         echo "start upgrade-cluster.yaml workflow"
-        echo "- cluster_resource_id: " ${{ github.event.inputs.cluster_resource_id }}
+        echo "- subscription_id: " ${{ github.event.inputs.subscription_id }}
+        echo "- resource_group: " ${{ github.event.inputs.resource_group }}
+        echo "- cluster_name: " ${{ github.event.inputs.cluster_name }}
+        echo "- cluster_resource_id: " "/subscriptions/${{ github.event.inputs.subscription_id }}/resourceGroups/${{ github.event.inputs.resource_group }}/providers/Microsoft.ContainerService/managedClusters/${{ github.event.inputs.cluster_name }}"
         echo "- target_version: " ${{ github.event.inputs.target_version }} 
 
     - name: Azure CLI Login
