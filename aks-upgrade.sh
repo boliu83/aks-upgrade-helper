@@ -60,6 +60,11 @@ else
     --node-image-only -y --no-wait
 fi
 
+if [ $? -ne 0 ]; then
+    log_error "Failed to initiate AKS cluster upgrade."
+    exit 1
+fi
+
 while true; do
     timestamp=$(date +"%Y-%m-%d %H:%M:%S")
     CLUSTER_PROVISIONING_STATE=$(az aks show --resource-group "${CLUSTER_RESOURCE_GROUP}" --name "${CLUSTER_NAME}" --query provisioningState -o tsv)
