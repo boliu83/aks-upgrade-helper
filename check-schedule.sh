@@ -41,13 +41,6 @@ validate_iso8601() {
 # Get current time in UTC (seconds since epoch)
 NOW_UTC=$(date -u +"%s")
 
-# GH CLI login using GITHUB_TOKEN from environment variable
-if [[ -z "${GITHUB_TOKEN:-}" ]]; then
-  echo "Error: GITHUB_TOKEN environment variable is not set." >&2
-  exit 1
-fi
-
-echo "$GITHUB_TOKEN" | gh auth login --with-token 
 
 # Process each .txt file under the schedule directory
 for file in "$SCHEDULE_DIR"/*.txt; do
