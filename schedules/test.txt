@@ -6,8 +6,8 @@ fedcba98-7654-3210-9876-543210987654,old-infra,legacy-workloads,1.29.12,2025-06-
 11111111-2222-3333-4444-555555555555,past-env,completed-upgrade-1,1.30.2,2025-06-28T12:00:00Z
 
 # dummy records - Rest of this week 
-b1234567-89ab-cdef-1234-56789abcdef0,weekly-rg,friday-cluster,1.32.22,2025-07-11T08:00:00Z
-c2345678-9abc-def1-2345-6789abcdef01,weekend-resources,saturday-aks,1.31.24,2025-07-11T12:15:00Z
+b1234567-89ab-cdef-1234-56789abcdef0,weekly-rg,friday-cluster,1.32.22,2025-07-09T08:30:00Z
+c2345678-9abc-def1-2345-6789abcdef01,weekend-resources,saturday-aks,1.31.24,2025-07-09T09:30:00Z
 d3456789-abcd-ef12-3456-789abcdef012,sunday-env,weekend-cluster,1.32.24,2025-07-11T16:30:00Z
 e4567890-bcde-f123-4567-89abcdef0123,end-week-rg,final-friday-aks,1.31.26,2025-07-11T20:45:00Z
 
