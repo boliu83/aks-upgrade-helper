@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AKS Upgrade Schedule Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            background-color: #495057;
+            color: white;
+            border: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .table tbody td {
+            border-color: #e9ecef;
+            vertical-align: middle;
+            padding: 1rem 0.75rem;
+        }
+        
+        .table tbody td:first-child {
+            min-width: 120px;
+            white-space: nowrap;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            display: inline-block;
+        }
+        
+        .status-urgent {
+            background-color: #dc3545;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-upcoming {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .status-future {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .status-past {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .urgent-row {
+            background-color: #fff5f5 !important;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .urgent-row:hover {
+            background-color: #ffeaea !important;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .refresh-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+        }
+        
+        .time-info {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
+        
+        .cluster-name {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .version-badge {
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 0.25rem 0.5rem;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-0"><i class="fas fa-calendar-alt me-3"></i>AKS Upgrade Schedule Dashboard</h1>
+                    <p class="mb-0 mt-2">Real-time monitoring of Azure Kubernetes Service upgrade schedules</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="time-info">
+                        <i class="fas fa-clock me-2"></i>
+                        <span id="currentTime"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="stats-card">
+                    <div class="stats-number text-danger" id="urgentCount">0</div>
+                    <div class="stats-label">Next 24 Hours</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card">
+                    <div class="stats-number text-warning" id="upcomingCount">0</div>
+                    <div class="stats-label">This Week</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card">
+                    <div class="stats-number text-success" id="futureCount">0</div>
+                    <div class="stats-label">Future</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card">
+                    <div class="stats-number text-secondary" id="totalCount">0</div>
+                    <div class="stats-label">Total</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Table -->
+        <div class="card">
+            <div class="card-header bg-white py-3">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Upgrade Schedule</h5>
+                    </div>
+                    <div class="col-auto">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="filterTable('all')">All</button>
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="filterTable('urgent')">Next 24h</button>
+                            <button type="button" class="btn btn-outline-warning btn-sm" onclick="filterTable('upcoming')">This Week</button>
+                            <button type="button" class="btn btn-outline-success btn-sm" onclick="filterTable('future')">Future</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover" id="scheduleTable">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-exclamation-circle me-1"></i>Status</th>
+                            <th><i class="fas fa-cloud me-1"></i>Subscription ID</th>
+                            <th><i class="fas fa-layer-group me-1"></i>Resource Group</th>
+                            <th><i class="fas fa-server me-1"></i>Cluster Name</th>
+                            <th><i class="fas fa-tag me-1"></i>Target Version</th>
+                            <th><i class="fas fa-calendar-check me-1"></i>Scheduled Time</th>
+                            <th><i class="fas fa-clock me-1"></i>Time Until</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleTableBody">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Refresh Button -->
+    <button class="btn btn-primary btn-lg refresh-btn" onclick="location.reload()" title="Refresh Data">
+        <i class="fas fa-sync-alt"></i>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Schedule data will be inserted here
+        const scheduleData = [{"subscriptionId":"d17e2897-3940-4fc2-9ce2-e6689837c2a7","resourceGroup":"aks-lab","clusterName":"aks-cilium","targetVersion":"1.32.6","scheduledTime":"2025-07-08T18:50:00Z"},{"subscriptionId":"12345678-1234-5678-9abc-def123456789","resourceGroup":"legacy-rg","clusterName":"old-cluster-1","targetVersion":"1.30.4","scheduledTime":"2025-06-15T10:30:00Z"},{"subscriptionId":"87654321-4321-8765-cba9-fed987654321","resourceGroup":"archive-resources","clusterName":"deprecated-aks","targetVersion":"1.29.8","scheduledTime":"2025-06-18T14:20:00Z"},{"subscriptionId":"abcdef12-3456-7890-abcd-ef1234567890","resourceGroup":"historical-rg","clusterName":"past-cluster-1","targetVersion":"1.30.6","scheduledTime":"2025-06-22T08:45:00Z"},{"subscriptionId":"fedcba98-7654-3210-9876-543210987654","resourceGroup":"old-infra","clusterName":"legacy-workloads","targetVersion":"1.29.12","scheduledTime":"2025-06-25T16:15:00Z"},{"subscriptionId":"11111111-2222-3333-4444-555555555555","resourceGroup":"past-env","clusterName":"completed-upgrade-1","targetVersion":"1.30.2","scheduledTime":"2025-06-28T12:00:00Z"},{"subscriptionId":"22222222-3333-4444-5555-666666666666","resourceGroup":"archive-cluster-rg","clusterName":"finished-aks-1","targetVersion":"1.30.8","scheduledTime":"2025-07-01T09:30:00Z"},{"subscriptionId":"33333333-4444-5555-6666-777777777777","resourceGroup":"old-deployment","clusterName":"past-microservices","targetVersion":"1.29.10","scheduledTime":"2025-07-02T15:45:00Z"},{"subscriptionId":"44444444-5555-6666-7777-888888888888","resourceGroup":"legacy-platform","clusterName":"archive-backend","targetVersion":"1.30.1","scheduledTime":"2025-07-03T11:20:00Z"},{"subscriptionId":"55555555-6666-7777-8888-999999999999","resourceGroup":"historical-infra","clusterName":"old-data-cluster","targetVersion":"1.29.14","scheduledTime":"2025-07-04T07:10:00Z"},{"subscriptionId":"66666666-7777-8888-9999-aaaaaaaaaaaa","resourceGroup":"past-resources","clusterName":"completed-ml-aks","targetVersion":"1.30.3","scheduledTime":"2025-07-05T13:25:00Z"},{"subscriptionId":"77777777-8888-9999-aaaa-bbbbbbbbbbbb","resourceGroup":"archive-env","clusterName":"finished-api-cluster","targetVersion":"1.29.16","scheduledTime":"2025-07-06T18:40:00Z"},{"subscriptionId":"88888888-9999-aaaa-bbbb-cccccccccccc","resourceGroup":"legacy-setup","clusterName":"old-ecommerce-aks","targetVersion":"1.30.5","scheduledTime":"2025-07-07T06:55:00Z"},{"subscriptionId":"99999999-aaaa-bbbb-cccc-dddddddddddd","resourceGroup":"past-platform","clusterName":"archive-gaming-cluster","targetVersion":"1.29.18","scheduledTime":"2025-07-08T14:30:00Z"},{"subscriptionId":"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee","resourceGroup":"historical-setup","clusterName":"completed-finance-aks","targetVersion":"1.30.7","scheduledTime":"2025-07-08T20:15:00Z"},{"subscriptionId":"bbbbbbbb-cccc-dddd-eeee-ffffffffffff","resourceGroup":"old-monitoring","clusterName":"past-observability","targetVersion":"1.29.20","scheduledTime":"2025-06-10T05:20:00Z"},{"subscriptionId":"cccccccc-dddd-eeee-ffff-000000000000","resourceGroup":"archive-test","clusterName":"legacy-healthcare-aks","targetVersion":"1.30.9","scheduledTime":"2025-06-12T11:35:00Z"},{"subscriptionId":"dddddddd-eeee-ffff-0000-111111111111","resourceGroup":"past-dev","clusterName":"finished-trading-cluster","targetVersion":"1.29.22","scheduledTime":"2025-06-14T17:50:00Z"},{"subscriptionId":"eeeeeeee-ffff-0000-1111-222222222222","resourceGroup":"historical-prod","clusterName":"old-patient-data","targetVersion":"1.30.11","scheduledTime":"2025-06-16T23:05:00Z"},{"subscriptionId":"ffffffff-0000-1111-2222-333333333333","resourceGroup":"legacy-staging","clusterName":"archive-webapp-cluster","targetVersion":"1.29.24","scheduledTime":"2025-06-19T04:40:00Z"},{"subscriptionId":"00000000-1111-2222-3333-444444444444","resourceGroup":"past-test","clusterName":"completed-api-backend","targetVersion":"1.30.13","scheduledTime":"2025-06-21T10:55:00Z"},{"subscriptionId":"12121212-3434-5656-7878-909090909090","resourceGroup":"old-gaming","clusterName":"finished-game-cluster","targetVersion":"1.29.26","scheduledTime":"2025-06-23T16:10:00Z"},{"subscriptionId":"34343434-5656-7878-9090-121212121212","resourceGroup":"archive-finance","clusterName":"past-trading-aks","targetVersion":"1.30.15","scheduledTime":"2025-06-26T22:25:00Z"},{"subscriptionId":"56565656-7878-9090-1212-343434343434","resourceGroup":"historical-health","clusterName":"old-medical-cluster","targetVersion":"1.29.28","scheduledTime":"2025-06-29T03:40:00Z"},{"subscriptionId":"78787878-9090-1212-3434-565656565656","resourceGroup":"legacy-monitor","clusterName":"archive-metrics-aks","targetVersion":"1.30.17","scheduledTime":"2025-07-01T09:55:00Z"},{"subscriptionId":"90909090-1212-3434-5656-787878787878","resourceGroup":"past-ml","clusterName":"completed-ai-cluster","targetVersion":"1.29.30","scheduledTime":"2025-07-02T15:10:00Z"},{"subscriptionId":"13131313-2424-3535-4646-575757575757","resourceGroup":"old-edge","clusterName":"finished-iot-aks","targetVersion":"1.30.19","scheduledTime":"2025-07-03T21:25:00Z"},{"subscriptionId":"24242424-3535-4646-5757-686868686868","resourceGroup":"archive-mobile","clusterName":"past-app-cluster","targetVersion":"1.29.32","scheduledTime":"2025-07-04T02:40:00Z"},{"subscriptionId":"35353535-4646-5757-6868-797979797979","resourceGroup":"historical-web","clusterName":"old-frontend-aks","targetVersion":"1.30.21","scheduledTime":"2025-07-05T08:55:00Z"},{"subscriptionId":"46464646-5757-6868-7979-808080808080","resourceGroup":"legacy-cache","clusterName":"archive-redis-cluster","targetVersion":"1.29.34","scheduledTime":"2025-07-06T14:10:00Z"},{"subscriptionId":"57575757-6868-7979-8080-919191919191","resourceGroup":"past-queue","clusterName":"completed-kafka-aks","targetVersion":"1.30.23","scheduledTime":"2025-07-07T19:25:00Z"},{"subscriptionId":"68686868-7979-8080-9191-a2a2a2a2a2a2","resourceGroup":"old-search","clusterName":"finished-elastic-cluster","targetVersion":"1.29.36","scheduledTime":"2025-07-08T01:40:00Z"},{"subscriptionId":"79797979-8080-9191-a2a2-b3b3b3b3b3b3","resourceGroup":"archive-log","clusterName":"past-logging-aks","targetVersion":"1.30.25","scheduledTime":"2025-07-08T07:55:00Z"},{"subscriptionId":"80808080-9191-a2a2-b3b3-c4c4c4c4c4c4","resourceGroup":"historical-cdn","clusterName":"old-content-cluster","targetVersion":"1.29.38","scheduledTime":"2025-06-11T13:10:00Z"},{"subscriptionId":"91919191-a2a2-b3b3-c4c4-d5d5d5d5d5d5","resourceGroup":"legacy-auth","clusterName":"archive-identity-aks","targetVersion":"1.30.27","scheduledTime":"2025-06-13T18:25:00Z"},{"subscriptionId":"a2a2a2a2-b3b3-c4c4-d5d5-e6e6e6e6e6e6","resourceGroup":"past-notify","clusterName":"completed-messaging-cluster","targetVersion":"1.29.40","scheduledTime":"2025-06-15T23:40:00Z"},{"subscriptionId":"b3b3b3b3-c4c4-d5d5-e6e6-f7f7f7f7f7f7","resourceGroup":"old-batch","clusterName":"finished-processing-aks","targetVersion":"1.30.29","scheduledTime":"2025-06-17T04:55:00Z"},{"subscriptionId":"c4c4c4c4-d5d5-e6e6-f7f7-080808080808","resourceGroup":"archive-stream","clusterName":"past-streaming-cluster","targetVersion":"1.29.42","scheduledTime":"2025-06-20T10:10:00Z"},{"subscriptionId":"d5d5d5d5-e6e6-f7f7-0808-191919191919","resourceGroup":"historical-sync","clusterName":"old-replication-aks","targetVersion":"1.30.31","scheduledTime":"2025-06-24T15:25:00Z"},{"subscriptionId":"e6e6e6e6-f7f7-0808-1919-2a2a2a2a2a2a","resourceGroup":"legacy-backup","clusterName":"archive-storage-cluster","targetVersion":"1.29.44","scheduledTime":"2025-06-27T20:40:00Z"},{"subscriptionId":"f7f7f7f7-0808-1919-2a2a-3b3b3b3b3b3b","resourceGroup":"past-security","clusterName":"completed-vault-aks","targetVersion":"1.30.33","scheduledTime":"2025-06-30T01:55:00Z"},{"subscriptionId":"1a2b3c4d-5e6f-7890-1234-567890abcdef","resourceGroup":"urgent-rg","clusterName":"critical-cluster-1","targetVersion":"1.32.12","scheduledTime":"2025-07-09T02:15:00Z"},{"subscriptionId":"2b3c4d5e-6f78-9012-3456-7890abcdef12","resourceGroup":"emergency-resources","clusterName":"hotfix-aks","targetVersion":"1.31.14","scheduledTime":"2025-07-09T05:30:00Z"},{"subscriptionId":"3c4d5e6f-7890-1234-5678-90abcdef1234","resourceGroup":"immediate-env","clusterName":"priority-cluster","targetVersion":"1.32.14","scheduledTime":"2025-07-09T06:45:00Z"},{"subscriptionId":"4d5e6f78-9012-3456-7890-abcdef123456","resourceGroup":"fast-track-rg","clusterName":"express-aks","targetVersion":"1.31.16","scheduledTime":"2025-07-09T10:00:00Z"},{"subscriptionId":"5e6f7890-1234-5678-9abc-def123456789","resourceGroup":"quick-deploy","clusterName":"rapid-cluster","targetVersion":"1.32.16","scheduledTime":"2025-07-10T12:15:00Z"},{"subscriptionId":"6f789012-3456-789a-bcde-f123456789ab","resourceGroup":"speed-resources","clusterName":"swift-aks","targetVersion":"1.31.18","scheduledTime":"2025-07-10T16:30:00Z"},{"subscriptionId":"78901234-5678-9abc-def1-23456789abcd","resourceGroup":"rush-env","clusterName":"hasty-cluster","targetVersion":"1.32.18","scheduledTime":"2025-07-10T09:45:00Z"},{"subscriptionId":"89012345-6789-abcd-ef12-3456789abcde","resourceGroup":"accelerated-rg","clusterName":"velocity-aks","targetVersion":"1.31.20","scheduledTime":"2025-07-10T15:00:00Z"},{"subscriptionId":"90123456-789a-bcde-f123-456789abcdef","resourceGroup":"turbo-platform","clusterName":"boost-cluster","targetVersion":"1.32.20","scheduledTime":"2025-07-10T19:15:00Z"},{"subscriptionId":"a0123456-789a-bcde-f123-456789abcdef","resourceGroup":"lightning-infra","clusterName":"flash-aks","targetVersion":"1.31.22","scheduledTime":"2025-07-10T23:30:00Z"},{"subscriptionId":"b1234567-89ab-cdef-1234-56789abcdef0","resourceGroup":"weekly-rg","clusterName":"friday-cluster","targetVersion":"1.32.22","scheduledTime":"2025-07-11T08:00:00Z"},{"subscriptionId":"c2345678-9abc-def1-2345-6789abcdef01","resourceGroup":"weekend-resources","clusterName":"saturday-aks","targetVersion":"1.31.24","scheduledTime":"2025-07-11T12:15:00Z"},{"subscriptionId":"d3456789-abcd-ef12-3456-789abcdef012","resourceGroup":"sunday-env","clusterName":"weekend-cluster","targetVersion":"1.32.24","scheduledTime":"2025-07-11T16:30:00Z"},{"subscriptionId":"e4567890-bcde-f123-4567-89abcdef0123","resourceGroup":"end-week-rg","clusterName":"final-friday-aks","targetVersion":"1.31.26","scheduledTime":"2025-07-11T20:45:00Z"},{"subscriptionId":"f5678901-cdef-1234-5678-9abcdef01234","resourceGroup":"week-close-resources","clusterName":"closing-cluster","targetVersion":"1.32.26","scheduledTime":"2025-07-12T00:00:00Z"},{"subscriptionId":"05678901-def1-2345-6789-abcdef012345","resourceGroup":"saturday-rg","clusterName":"weekend-work-aks","targetVersion":"1.31.28","scheduledTime":"2025-07-12T04:15:00Z"},{"subscriptionId":"16789012-ef12-3456-789a-bcdef0123456","resourceGroup":"sunday-platform","clusterName":"rest-day-cluster","targetVersion":"1.32.28","scheduledTime":"2025-07-12T08:30:00Z"},{"subscriptionId":"2789012e-f123-4567-89ab-cdef01234567","resourceGroup":"week-end-infra","clusterName":"sunday-maintenance-aks","targetVersion":"1.31.30","scheduledTime":"2025-07-12T12:45:00Z"},{"subscriptionId":"3890123f-1234-5678-9abc-def012345678","resourceGroup":"final-weekend-rg","clusterName":"last-weekend-cluster","targetVersion":"1.32.30","scheduledTime":"2025-07-12T17:00:00Z"},{"subscriptionId":"49012340-2345-6789-abcd-ef0123456789","resourceGroup":"week-wrap-resources","clusterName":"conclusion-aks","targetVersion":"1.31.32","scheduledTime":"2025-07-12T21:15:00Z"},{"subscriptionId":"5a012341-3456-789a-bcde-f01234567890","resourceGroup":"saturday-night-rg","clusterName":"late-weekend-cluster","targetVersion":"1.32.32","scheduledTime":"2025-07-13T01:30:00Z"},{"subscriptionId":"6b012342-4567-89ab-cdef-012345678901","resourceGroup":"sunday-morning-env","clusterName":"early-sunday-aks","targetVersion":"1.31.34","scheduledTime":"2025-07-13T05:45:00Z"},{"subscriptionId":"7c012343-5678-9abc-def0-123456789012","resourceGroup":"mid-sunday-platform","clusterName":"noon-cluster","targetVersion":"1.32.34","scheduledTime":"2025-07-13T10:00:00Z"},{"subscriptionId":"8d012344-6789-abcd-ef01-234567890123","resourceGroup":"sunday-afternoon-rg","clusterName":"evening-prep-aks","targetVersion":"1.31.36","scheduledTime":"2025-07-13T14:15:00Z"},{"subscriptionId":"9e012345-789a-bcde-f012-345678901234","resourceGroup":"week-transition-resources","clusterName":"monday-prep-cluster","targetVersion":"1.32.36","scheduledTime":"2025-07-13T18:30:00Z"},{"subscriptionId":"af012346-89ab-cdef-0123-456789012345","resourceGroup":"sunday-night-env","clusterName":"week-end-aks","targetVersion":"1.31.38","scheduledTime":"2025-07-13T22:45:00Z"},{"subscriptionId":"b0123457-9abc-def0-1234-567890123456","resourceGroup":"pre-monday-rg","clusterName":"transition-cluster","targetVersion":"1.32.38","scheduledTime":"2025-07-11T03:20:00Z"},{"subscriptionId":"c1234568-abcd-ef01-2345-678901234567","resourceGroup":"friday-morning-platform","clusterName":"early-weekend-aks","targetVersion":"1.31.40","scheduledTime":"2025-07-11T07:35:00Z"},{"subscriptionId":"d2345679-bcde-f012-3456-789012345678","resourceGroup":"friday-evening-infra","clusterName":"weekend-start-cluster","targetVersion":"1.32.40","scheduledTime":"2025-07-11T11:50:00Z"},{"subscriptionId":"e345678a-cdef-0123-4567-89012345678a","resourceGroup":"saturday-prep-resources","clusterName":"weekend-ready-aks","targetVersion":"1.31.42","scheduledTime":"2025-07-13T02:05:00Z"},{"subscriptionId":"f456789b-def0-1234-5678-9012345678ab","resourceGroup":"future-rg","clusterName":"next-week-cluster","targetVersion":"1.33.0","scheduledTime":"2025-07-14T09:00:00Z"},{"subscriptionId":"0567890c-ef01-2345-6789-012345678abc","resourceGroup":"upcoming-resources","clusterName":"planned-aks","targetVersion":"1.32.42","scheduledTime":"2025-07-15T13:15:00Z"},{"subscriptionId":"1678901d-f012-3456-789a-12345678abcd","resourceGroup":"scheduled-env","clusterName":"future-cluster","targetVersion":"1.33.2","scheduledTime":"2025-07-16T17:30:00Z"},{"subscriptionId":"2789012e-0123-4567-89ab-2345678abcde","resourceGroup":"next-platform","clusterName":"tomorrow-aks","targetVersion":"1.32.44","scheduledTime":"2025-07-17T21:45:00Z"},{"subscriptionId":"3890123f-1234-5678-9abc-345678abcdef","resourceGroup":"coming-infra","clusterName":"upcoming-cluster","targetVersion":"1.33.4","scheduledTime":"2025-07-18T01:00:00Z"},{"subscriptionId":"49012340-2345-6789-abcd-45678abcdef0","resourceGroup":"future-week-rg","clusterName":"next-period-aks","targetVersion":"1.32.46","scheduledTime":"2025-07-19T05:15:00Z"},{"subscriptionId":"5a123451-3456-789a-bcde-5678abcdef01","resourceGroup":"later-resources","clusterName":"distant-cluster","targetVersion":"1.33.6","scheduledTime":"2025-07-20T09:30:00Z"},{"subscriptionId":"6b234562-4567-89ab-cdef-678abcdef012","resourceGroup":"forward-env","clusterName":"ahead-aks","targetVersion":"1.32.48","scheduledTime":"2025-07-21T13:45:00Z"},{"subscriptionId":"7c345673-5678-9abc-def0-78abcdef0123","resourceGroup":"progressive-platform","clusterName":"advance-cluster","targetVersion":"1.33.8","scheduledTime":"2025-07-22T18:00:00Z"},{"subscriptionId":"8d456784-6789-abcd-ef01-8abcdef01234","resourceGroup":"prospective-infra","clusterName":"forthcoming-aks","targetVersion":"1.32.50","scheduledTime":"2025-07-23T22:15:00Z"},{"subscriptionId":"9e567895-789a-bcde-f012-abcdef012345","resourceGroup":"eventual-rg","clusterName":"eventual-cluster","targetVersion":"1.33.10","scheduledTime":"2025-07-24T02:30:00Z"},{"subscriptionId":"af6789a6-89ab-cdef-0123-bcdef0123456","resourceGroup":"pending-resources","clusterName":"pending-aks","targetVersion":"1.32.52","scheduledTime":"2025-07-25T06:45:00Z"},{"subscriptionId":"b0789ab7-9abc-def0-1234-cdef01234567","resourceGroup":"awaiting-env","clusterName":"waiting-cluster","targetVersion":"1.33.12","scheduledTime":"2025-07-26T11:00:00Z"},{"subscriptionId":"c189abc8-abcd-ef01-2345-def012345678","resourceGroup":"anticipating-platform","clusterName":"expected-aks","targetVersion":"1.32.54","scheduledTime":"2025-07-27T15:15:00Z"},{"subscriptionId":"d29abcd9-bcde-f012-3456-ef0123456789","resourceGroup":"approaching-infra","clusterName":"nearing-cluster","targetVersion":"1.33.14","scheduledTime":"2025-07-28T19:30:00Z"},{"subscriptionId":"e3abcdea-cdef-0123-4567-f012345678ab","resourceGroup":"imminent-rg","clusterName":"close-future-aks","targetVersion":"1.32.56","scheduledTime":"2025-07-29T23:45:00Z"},{"subscriptionId":"f4bcdefb-def0-1234-5678-012345678abc","resourceGroup":"near-term-resources","clusterName":"short-future-cluster","targetVersion":"1.33.16","scheduledTime":"2025-07-30T04:00:00Z"},{"subscriptionId":"05cdef0c-ef01-2345-6789-12345678abcd","resourceGroup":"proximate-env","clusterName":"nearby-aks","targetVersion":"1.32.58","scheduledTime":"2025-07-31T08:15:00Z"},{"subscriptionId":"16def01d-f012-3456-789a-2345678abcde","resourceGroup":"adjacent-platform","clusterName":"neighboring-cluster","targetVersion":"1.33.18","scheduledTime":"2025-08-01T12:30:00Z"},{"subscriptionId":"27ef012e-0123-4567-89ab-345678abcdef","resourceGroup":"next-month-infra","clusterName":"august-aks","targetVersion":"1.32.60","scheduledTime":"2025-08-02T16:45:00Z"},{"subscriptionId":"38f0123f-1234-5678-9abc-45678abcdef0","resourceGroup":"following-rg","clusterName":"subsequent-cluster","targetVersion":"1.33.20","scheduledTime":"2025-08-03T21:00:00Z"},{"subscriptionId":"49012340-2345-6789-abcd-5678abcdef01","resourceGroup":"succeeding-resources","clusterName":"consecutive-aks","targetVersion":"1.32.62","scheduledTime":"2025-08-04T01:15:00Z"},{"subscriptionId":"5a123451-3456-789a-bcde-678abcdef012","resourceGroup":"trailing-env","clusterName":"following-cluster","targetVersion":"1.33.22","scheduledTime":"2025-08-05T05:30:00Z"},{"subscriptionId":"6b234562-4567-89ab-cdef-78abcdef0123","resourceGroup":"posterior-platform","clusterName":"behind-schedule-aks","targetVersion":"1.32.64","scheduledTime":"2025-08-06T09:45:00Z"},{"subscriptionId":"7c345673-5678-9abc-def0-8abcdef01234","resourceGroup":"later-infra","clusterName":"delayed-cluster","targetVersion":"1.33.24","scheduledTime":"2025-08-07T14:00:00Z"},{"subscriptionId":"8d456784-6789-abcd-ef01-abcdef012345","resourceGroup":"extended-rg","clusterName":"prolonged-aks","targetVersion":"1.32.66","scheduledTime":"2025-08-08T18:15:00Z"},{"subscriptionId":"9e567895-789a-bcde-f012-bcdef0123456","resourceGroup":"stretched-resources","clusterName":"elongated-cluster","targetVersion":"1.33.26","scheduledTime":"2025-08-09T22:30:00Z"},{"subscriptionId":"af6789a6-89ab-cdef-0123-cdef01234567","resourceGroup":"protracted-env","clusterName":"lengthened-aks","targetVersion":"1.32.68","scheduledTime":"2025-08-10T02:45:00Z"},{"subscriptionId":"b0789ab7-9abc-def0-1234-def012345678","resourceGroup":"expanded-platform","clusterName":"extended-timeline-cluster","targetVersion":"1.33.28","scheduledTime":"2025-08-11T07:00:00Z"},{"subscriptionId":"c189abc8-abcd-ef01-2345-ef0123456789","resourceGroup":"amplified-infra","clusterName":"magnified-aks","targetVersion":"1.32.70","scheduledTime":"2025-08-12T11:15:00Z"}];
+        
+        let currentFilter = 'all';
+        
+        function updateCurrentTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleString();
+        }
+        
+        function getStatus(scheduledTime) {
+            const now = new Date();
+            const scheduled = new Date(scheduledTime);
+            const diffHours = (scheduled - now) / (1000 * 60 * 60);
+            
+            if (diffHours < 0) {
+                return 'past';
+            } else if (diffHours <= 24) {
+                return 'urgent';
+            } else if (diffHours <= 168) { // 7 days
+                return 'upcoming';
+            } else {
+                return 'future';
+            }
+        }
+        
+        function getStatusBadge(status) {
+            const badges = {
+                'urgent': '<span class="status-badge status-urgent"><i class="fas fa-exclamation-triangle me-1"></i>Next 24h</span>',
+                'upcoming': '<span class="status-badge status-upcoming"><i class="fas fa-clock me-1"></i>This Week</span>',
+                'future': '<span class="status-badge status-future"><i class="fas fa-calendar-plus me-1"></i>Future</span>',
+                'past': '<span class="status-badge status-past"><i class="fas fa-check me-1"></i>Completed</span>'
+            };
+            return badges[status] || badges['future'];
+        }
+        
+        function getTimeUntil(scheduledTime) {
+            const now = new Date();
+            const scheduled = new Date(scheduledTime);
+            const diff = scheduled - now;
+            
+            if (diff < 0) {
+                const pastDiff = Math.abs(diff);
+                const days = Math.floor(pastDiff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((pastDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                
+                if (days > 0) {
+                    return `${days}d ${hours}h ago`;
+                } else {
+                    return `${hours}h ago`;
+                }
+            }
+            
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            
+            if (days > 0) {
+                return `${days}d ${hours}h`;
+            } else if (hours > 0) {
+                return `${hours}h ${minutes}m`;
+            } else {
+                return `${minutes}m`;
+            }
+        }
+        
+        function formatDateTime(dateTimeString) {
+            const date = new Date(dateTimeString);
+            return date.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZoneName: 'short'
+            });
+        }
+        
+        function renderTable() {
+            const tbody = document.getElementById('scheduleTableBody');
+            const now = new Date();
+            
+            // Sort by scheduled time
+            const sortedData = [...scheduleData].sort((a, b) => new Date(a.scheduledTime) - new Date(b.scheduledTime));
+            
+            let urgentCount = 0, upcomingCount = 0, futureCount = 0, pastCount = 0;
+            
+            tbody.innerHTML = '';
+            
+            sortedData.forEach(item => {
+                const status = getStatus(item.scheduledTime);
+                
+                // Count items by status
+                switch(status) {
+                    case 'urgent': urgentCount++; break;
+                    case 'upcoming': upcomingCount++; break;
+                    case 'future': futureCount++; break;
+                    case 'past': pastCount++; break;
+                }
+                
+                // Apply filter
+                if (currentFilter !== 'all' && currentFilter !== status) {
+                    return;
+                }
+                
+                const row = document.createElement('tr');
+                if (status === 'urgent') {
+                    row.classList.add('urgent-row');
+                }
+                
+                row.innerHTML = `
+                    <td>${getStatusBadge(status)}</td>
+                    <td><code style="font-size: 0.8rem;">${item.subscriptionId}</code></td>
+                    <td><strong>${item.resourceGroup}</strong></td>
+                    <td><span class="cluster-name">${item.clusterName}</span></td>
+                    <td><span class="version-badge">${item.targetVersion}</span></td>
+                    <td>${formatDateTime(item.scheduledTime)}</td>
+                    <td><strong>${getTimeUntil(item.scheduledTime)}</strong></td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            // Update statistics
+            document.getElementById('urgentCount').textContent = urgentCount;
+            document.getElementById('upcomingCount').textContent = upcomingCount;
+            document.getElementById('futureCount').textContent = futureCount;
+            document.getElementById('totalCount').textContent = scheduleData.length;
+        }
+        
+        function filterTable(filter) {
+            currentFilter = filter;
+            
+            // Update button states
+            document.querySelectorAll('.btn-group button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (filter === 'all') {
+                document.querySelector('button[onclick="filterTable(\'all\')"]').classList.add('active');
+            } else if (filter === 'urgent') {
+                document.querySelector('button[onclick="filterTable(\'urgent\')"]').classList.add('active');
+            } else if (filter === 'upcoming') {
+                document.querySelector('button[onclick="filterTable(\'upcoming\')"]').classList.add('active');
+            } else if (filter === 'future') {
+                document.querySelector('button[onclick="filterTable(\'future\')"]').classList.add('active');
+            }
+            
+            renderTable();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCurrentTime();
+            renderTable();
+            
+            // Update time every minute
+            setInterval(updateCurrentTime, 60000);
+            
+            // Update table every 5 minutes
+            setInterval(renderTable, 300000);
+            
+            // Set default filter to show all
+            filterTable('all');
+        });
+    </script>
+</body>
+</html>
