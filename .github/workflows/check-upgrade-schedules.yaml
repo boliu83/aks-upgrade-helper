@@ -3,7 +3,7 @@ name: Run upgrade scheduler
 on:
   # trigger on hourly schedule
   schedule:
-    - cron: '0 * * * *' # every hour
+    - cron: '10 * * * *' # every hour
   # trigger on ad hoc run 
   workflow_dispatch:
 
