@@ -1,0 +1,22 @@
+# dummy records - Past upgrades 
+12345678-1234-5678-9abc-def123456789,legacy-rg,old-cluster-1,1.30.4,2025-06-15T10:30:00Z
+87654321-4321-8765-cba9-fed987654321,archive-resources,deprecated-aks,1.29.8,2025-06-18T14:20:00Z
+abcdef12-3456-7890-abcd-ef1234567890,historical-rg,past-cluster-1,1.30.6,2025-06-22T08:45:00Z
+fedcba98-7654-3210-9876-543210987654,old-infra,legacy-workloads,1.29.12,2025-06-25T16:15:00Z
+11111111-2222-3333-4444-555555555555,past-env,completed-upgrade-1,1.30.2,2025-06-28T12:00:00Z
+
+# dummy records - Rest of this week 
+b1234567-89ab-cdef-1234-56789abcdef0,weekly-rg,friday-cluster,1.32.22,2025-07-11T08:00:00Z
+c2345678-9abc-def1-2345-6789abcdef01,weekend-resources,saturday-aks,1.31.24,2025-07-11T12:15:00Z
+d3456789-abcd-ef12-3456-789abcdef012,sunday-env,weekend-cluster,1.32.24,2025-07-11T16:30:00Z
+e4567890-bcde-f123-4567-89abcdef0123,end-week-rg,final-friday-aks,1.31.26,2025-07-11T20:45:00Z
+
+
+# dummy records - Future upgrades beyond this week
+f456789b-def0-1234-5678-9012345678ab,future-rg,next-week-cluster,1.33.0,2025-07-14T09:00:00Z
+0567890c-ef01-2345-6789-012345678abc,upcoming-resources,planned-aks,1.32.42,2025-07-15T13:15:00Z
+1678901d-f012-3456-789a-12345678abcd,scheduled-env,future-cluster,1.33.2,2025-07-16T17:30:00Z
+2789012e-0123-4567-89ab-2345678abcde,next-platform,tomorrow-aks,1.32.44,2025-07-17T21:45:00Z
+3890123f-1234-5678-9abc-345678abcdef,coming-infra,upcoming-cluster,1.33.4,2025-07-18T01:00:00Z
+49012340-2345-6789-abcd-45678abcdef0,future-week-rg,next-period-aks,1.32.46,2025-07-19T05:15:00Z
+5a123451-3456-789a-bcde-5678abcdef01,later-resources,distant-cluster,1.33.6,2025-07-20T09:30:00Z
