@@ -71,7 +71,7 @@ for file in "$SCHEDULE_DIR"/*.txt; do
     # Check if the upgrade is within the next 8 hours
     if (( delta >= 0 && delta <= TIME_WINDOW )); then
       echo "Scheduled upgrade is in current upgrade window. Triggering upgrade."
-      # run_aks_upgrade "$subscriptionId" "$resourceGroup" "$resourceName" "$targetVersion"
+      run_aks_upgrade "$subscriptionId" "$resourceGroup" "$resourceName" "$targetVersion"
     else
       if (( delta < 0 )); then
         echo "Scheduled upgrade is in the past. Skipping..."
