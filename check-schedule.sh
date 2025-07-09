@@ -70,7 +70,7 @@ for file in "$SCHEDULE_DIR"/*.txt; do
     delta=$(( scheduledEpoch - NOW_UTC ))
 
     echo -n $line " - "
-    # Check if the upgrade is within the next 8 hours
+    # Check if the upgrade is within the current upgrade window
     if (( delta >= 0 && delta <= TIME_WINDOW )); then
       echo "Scheduled upgrade is in current upgrade window. Triggering upgrade."
       run_aks_upgrade "$subscriptionId" "$resourceGroup" "$resourceName" "$targetVersion"
