@@ -4,8 +4,10 @@ set -euo pipefail
 # Directory containing schedule files
 SCHEDULE_DIR="schedules"
 
-# Time window in seconds (8 hours)
-TIME_WINDOW=$((8 * 3600))
+# Time window in seconds (1 hours)
+# This is the time window within which upgrades are considered valid. 
+# **MUST** match the cron schedule in the workflow file.
+TIME_WINDOW=$((1 * 3600))
 
 GH_REPO="boliu83/aks-upgrade-helper"
 GH_BRANCH="master"
